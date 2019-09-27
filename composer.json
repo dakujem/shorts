@@ -1,0 +1,31 @@
+{
+  "name": "dakujem/shorts",
+  "description": "Name shortener.",
+  "authors": [
+    {
+      "name": "Andrej Rypák",
+      "email": "xrypak@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">= 7.0"
+  },
+  "require-dev": {
+    "nette/tester": "^2.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Dakujem\\": "src/"
+    }
+  },
+  "scripts": {
+    "test": "@test:local",
+    "test:local": "tester tests -C",
+    "test:ci": "tester tests"
+  },
+  "scripts-descriptions": {
+    "test": "Run application tests. (defaults to local tests)",
+    "test:local": "Run application tests with local configuration.",
+    "test:ci": "Run application tests, provide configuration options as needed."
+  }
+}
