@@ -21,6 +21,14 @@ Supports:
 - unicode names
 
 
+What is not supported:
+- compound surnames (sorry folks, this may come later)
+- academic and other titles
+    - Bc. Foo Bar, Dr.Sc.
+    - John Bull, Sr.
+    - you need to parse these yourself
+- other writing systems than latin (may the will work, i'm just not testing them)
+
 ---
 
 
