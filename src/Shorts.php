@@ -5,7 +5,6 @@ namespace Dakujem;
 
 
 use LogicException;
-use RuntimeException;
 
 /**
  * Shorts
@@ -13,27 +12,250 @@ use RuntimeException;
 class Shorts
 {
 
+    const FIRST_NAME = 'fn';
+    const LAST_NAME = 'ln';
+
+//    /** @var callable */
+//    protected $splitter;
+//
+//    /** @var callable */
+//    protected $stitcher;
+//
+//
+//    /**
+//     * Shorts constructor.
+//     * @param callable $splitter
+//     * @param callable $stitcher
+//     */
+//    public function __construct(callable $splitter = null, callable $stitcher = null)
+//    {
+//        $this->splitter = $splitter ?? new ShortsSplitter();
+//        $this->stitcher = $stitcher ?? new ShortsStitcher();
+//    }
+
+
     /**
-     * Reduce a full name by shortening names to initials,
+     * Shorthand to create an instance. Optional.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
+    static function i(...$args): self
+    {
+        return new static(...$args);
+    }
+
+
+//  +-------------------------------------------------------------------------+
+//  | Public interface                                                        |
+//  +-------------------------------------------------------------------------+
+
+
+    /**
+     * Limit a given full name in length,
+     * shorten by reducing name parts to initials if needed,
      * so that the length of the result does not exceed given limit.
+     * Depending on $priority, last name (default) or first name will be kept intact, when possible.
      *
-     * "John Ronald Reuel Tolkien"
-     *      -> "John R. Reuel Tolkien"
-     *      -> "John R. R. Tolkien"
-     *      -> "J. R. R. Tolkien"
-     *      -> "J.R.R. Tolkien"
-     *      -> "J. Tolkien"
-     *      -> "J.R.R.T."
-     *      -> "JRRT"
-     *      -> "JT"
-     *      -> "T"
+     * input "John Ronald Reuel Tolkien"   ($priority=LAST_NAME, gradually reducing $limit)
+     *    -> "John R. Reuel Tolkien"
+     *    -> "John R. R. Tolkien"
+     *    -> "J. R. R. Tolkien"
+     *    -> "J.R.R. Tolkien"
+     *    -> "J. Tolkien"
+     *    -> "J.R.R.T."
+     *    -> "JRRT"
+     *    -> "JT"
+     *    -> "T"
      *
+     * input "John Ronald Reuel Tolkien"  ($priority=FIRST_NAME, gradually reducing $limit)
+     *    -> "John R. Reuel Tolkien"
+     *    -> "John R. R. Tolkien"
+     *    -> "John R. R. T."
+     *    -> "John R.R.T."
+     *    -> "J.R.R.T."
+     *    -> "John T."
+     *    -> "JRRT"
+     *    -> "JT"
+     *    -> "T"
      *
-     * @param string $full a full person name
+     * @param string $fullName a full person name
      * @param int    $limit
+     * @param string $priority
      * @return string
      */
-    function reduceFirst(string $full, int $limit): string
+    function limit(string $fullName, int $limit, string $priority = self::LAST_NAME): string
+    {
+        switch ($priority) {
+            case self::FIRST_NAME:
+                return $this->reduceLast($fullName, $limit);
+            case self::LAST_NAME:
+                return $this->reduceFirst($fullName, $limit);
+        }
+        throw new LogicException();
+    }
+
+
+    /**
+     * Reduce a name to initials
+     * keeping either the last name (default) or the first name intact.
+     *
+     * input "John Ronald Reuel Tolkien" -> "J. R. R. Tolkien" | "John R. R. T."
+     *
+     * @param string $fullName
+     * @param string $keep
+     * @return string
+     */
+    function reduce(string $fullName, string $keep = self::LAST_NAME): string
+    {
+        switch ($keep) {
+            case self::FIRST_NAME:
+                return $this->keepFirst($fullName);
+            case self::LAST_NAME:
+                return $this->keepLast($fullName);
+        }
+        throw new LogicException();
+    }
+
+
+    /**
+     * Reduce a full name to initials.
+     *
+     * input "Hugo Ventil" -> "HV" | "H. V." | ...
+     * input "John Ronald Reuel Tolkien" -> "JRRT" | "J. R. R. T." | ...
+     *
+     * @param string $fullName a full person name to be turned into initials
+     * @param string $suffix   suffix added to each produced initial,
+     *                         usually this would be empty to produce "AB" or a dot to produce "A. B."
+     * @param string $glue     glue to put the initials together,
+     *                         usually an empty string to produce "AB" or a space to produce "A. B."
+     * @return string
+     */
+    function toInitials(string $fullName, string $suffix = '', string $glue = ''): string
+    {
+        return $this->_initials($this->explode($fullName), $suffix, $glue);
+    }
+
+
+
+
+//  +-------------------------------------------------------------------------+
+//  | Static shorthand methods                                                |
+//  +-------------------------------------------------------------------------+
+
+
+    /**
+     * Static shorthand for the `limit` method.
+     *
+     * @param string $fullName
+     * @param int    $limit
+     * @param string $priority
+     * @return string
+     */
+    static function cap(string $fullName, int $limit, string $priority = self::LAST_NAME): string
+    {
+        return static::i()->limit($fullName, $limit, $priority);
+    }
+
+
+    /**
+     * Static shorthand for the `reduce` method.
+     *
+     * @param string $fullName
+     * @param string $keep
+     * @return string
+     */
+    static function shrink(string $fullName, string $keep = self::LAST_NAME): string
+    {
+        return static::i()->reduce($fullName, $keep);
+    }
+
+
+    /**
+     * Static shorthand for the `toInitials` method.
+     *
+     * @param string $fullName
+     * @param string $suffix
+     * @param string $glue
+     * @return string
+     */
+    static function initials(string $fullName, string $suffix = '', string $glue = ''): string
+    {
+        return static::i()->toInitials($fullName, $suffix, $glue);
+    }
+
+
+//  +-------------------------------------------------------------------------+
+//  | Formatters                                                              |
+//  +-------------------------------------------------------------------------+
+
+
+    /**
+     * Create an invokable filter that performs a preconfigured limiting.
+     *
+     * Usage:
+     * $fmt = $short->limiter(10);                // will limit and shorten all names to 10 chars:
+     * $fmt('Brandon Stark');                     // "B. Stark"
+     * $fmt('John Ronald Reuel Tolkien');         // "J. Tolkien"
+     *
+     * @param int    $limitPreset
+     * @param string $priorityPreset
+     * @return callable
+     */
+    function limiter(int $limitPreset, string $priorityPreset = self::LAST_NAME): callable
+    {
+        return function (string $fullName, int $limit = null, string $priority = null) use ($limitPreset, $priorityPreset): string {
+            return $this->limit($fullName, $limit ?? $limitPreset, $priority ?? $priorityPreset);
+        };
+    }
+
+
+    /**
+     * Create an invokable filter that performs a preconfigured reducing.
+     *
+     * Usage:
+     * $fmt = $short->reducer(Shorts::FIRSTNAME); // will short all names keeping the first name:
+     * $fmt('Brandon Stark');                     // "Brandon S."
+     * $fmt('John Ronald Reuel Tolkien');         // "John R. R. T."
+     *
+     * @param string $priorityPreset
+     * @return callable
+     */
+    function reducer(string $priorityPreset = self::LAST_NAME): callable
+    {
+        return function (string $fullName, string $priority = null) use ($priorityPreset): string {
+            return $this->reduce($fullName, $priority ?? $priorityPreset);
+        };
+    }
+
+
+    /**
+     * Create an invokable filter that generates initials with preconfigured settings.
+     *
+     * Usage:
+     * $fmt = $short->initialsFormatter(' ', '.');
+     * $fmt('Brandon Stark');                     // "B. S."
+     * $fmt('John Ronald Reuel Tolkien');         // "J. R. R. T."
+     *
+     * @param string $suffixPreset
+     * @param string $gluePreset
+     * @return callable
+     */
+    function initialsFormatter(string $suffixPreset = '', string $gluePreset = ''): callable
+    {
+        return function (string $fullName, string $suffix = null, string $glue = null) use ($suffixPreset, $gluePreset): string {
+            return $this->initials($fullName, $suffix ?? $suffixPreset, $glue ?? $gluePreset);
+        };
+    }
+
+
+//  +-------------------------------------------------------------------------+
+//  | Internals                                                               |
+//  +-------------------------------------------------------------------------+
+
+
+    /** @deprecated */
+    protected function reduceFirst(string $full, int $limit): string
     {
         return $this->limitNameTo($full, $limit, function (array $parts): array {
             return [
@@ -44,7 +266,8 @@ class Shorts
     }
 
 
-    function reduceLast(string $full, int $limit): string
+    /** @deprecated */
+    protected function reduceLast(string $full, int $limit): string
     {
         return $this->limitNameTo($full, $limit, function (array $parts): array {
             return [
@@ -55,7 +278,7 @@ class Shorts
     }
 
 
-    function limitNameTo(string $full, int $limit, callable $significant, callable $subroutine)
+    protected function limitNameTo(string $full, int $limit, callable $significant, callable $subroutine)
     {
         if ($limit < 1) {
             throw new LogicException('You may have slipped...');
@@ -93,13 +316,13 @@ class Shorts
     }
 
 
-    private function significantLastName(int $limit, int $minimalReduction, array $significantNames, array $middleNames): ?string
+    protected function significantLastName(int $limit, int $minimalReduction, array $significantNames, array $middleNames): ?string
     {
         $lastName = $significantNames[0];
         $firstName = $significantNames[1];
 
         // move the first name to the end, so that it is reduced last
-        [$reduced, $reduction] = $this->reduce(array_merge($middleNames, [$firstName]), $minimalReduction);
+        [$reduced, $reduction] = $this->reduceParts(array_merge($middleNames, [$firstName]), $minimalReduction);
         // move the first name back to the beginning
         $tmp = array_pop($reduced);
         array_unshift($reduced, $tmp);
@@ -131,13 +354,14 @@ class Shorts
         throw new LogicException('wtf'); // this should never happen
     }
 
-    private function significantFirstName(int $limit, int $minimalReduction, array $significantNames, array $middleNames): ?string
+
+    protected function significantFirstName(int $limit, int $minimalReduction, array $significantNames, array $middleNames): ?string
     {
         $firstName = $significantNames[0];
         $lastName = $significantNames[1];
 
         // move the first name to the end, so that it is reduced last
-        [$reduced, $reduction] = $this->reduce(array_merge($middleNames, [$lastName]), $minimalReduction);
+        [$reduced, $reduction] = $this->reduceParts(array_merge($middleNames, [$lastName]), $minimalReduction);
         if ($reduction >= $minimalReduction) {
             // success, the actual length reduction is greater or equal to the targeted reduction
             return $this->implode(array_merge([$firstName], $reduced));
@@ -167,7 +391,7 @@ class Shorts
     }
 
 
-    private function reduce(array $parts, int $minimalReduction): array
+    protected function reduceParts(array $parts, int $minimalReduction): array
     {
         $result = [];
         $reduction = 0;
@@ -194,7 +418,7 @@ class Shorts
      * @param string $full
      * @return string
      */
-    function keepFirst(string $full, string $suffix = '.', string $glue = ' '): string
+    protected function keepFirst(string $full, string $suffix = '.', string $glue = ' '): string
     {
         if ($full === '') {
             return '';
@@ -216,7 +440,7 @@ class Shorts
      * @param string $full
      * @return string
      */
-    function keepLast(string $full, string $suffix = '.', string $glue = ' '): string
+    protected function keepLast(string $full, string $suffix = '.', string $glue = ' '): string
     {
         if ($full === '') {
             return '';
@@ -229,25 +453,7 @@ class Shorts
     }
 
 
-    /**
-     * Reduce a full name to initials.
-     *
-     * "Hugo Ventil" -> "HV" / "H. V."
-     * "John Ronald Reuel Tolkien" -> "JRRT" / "J. R. R. T."
-     *
-     * @param string $full   a full person name to be turned into initials
-     * @param string $suffix suffix added to each produced initial,
-     *                       usually this would be empty to produce "AB" or a dot to produce "A. B."
-     * @param string $glue   glue to put the initials together,
-     *                       usually an empty string to produce "AB" or a space to produce "A. B."
-     * @return string
-     */
-    function initials(string $full, string $suffix = '', string $glue = ''): string
-    {
-        return $this->_initials($this->explode($full), $suffix, $glue);
-    }
-
-    private function _initials(array $parts, string $suffix = '', string $glue = ''): string
+    protected function _initials(array $parts, string $suffix = '', string $glue = ''): string
     {
         return $this->implode(array_map(function (string $p): string {
             return $p[0]; // return the first letter, the initial
@@ -255,7 +461,7 @@ class Shorts
     }
 
 
-    function limitInitials(string $full, int $limit): string
+    protected function limitInitials(string $full, int $limit): string
     {
         if ($limit < 1) {
             throw new LogicException('You may have slipped...');
@@ -264,7 +470,7 @@ class Shorts
         return $this->_limitInitials($parts, $limit);
     }
 
-    private function _limitInitials(array $parts, int $limit)
+    protected function _limitInitials(array $parts, int $limit)
     {
         $num = count($parts);
 
@@ -285,18 +491,6 @@ class Shorts
 
         // then the usual initials
         return $this->_initials($parts);
-    }
-
-    /**
-     * Shorthand to create an instance.
-     * Don't fancy static methods, prefer instances.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    static function i(...$args): self
-    {
-        return new static(...$args);
     }
 
 

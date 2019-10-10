@@ -1,6 +1,6 @@
 {
   "name": "dakujem/shorts",
-  "description": "Name shortener.",
+  "description": "A flexible name shortener. Allows to create initials, limiting name to certain length and variants.",
   "authors": [
     {
       "name": "Andrej Rypák",

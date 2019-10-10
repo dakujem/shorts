@@ -1,82 +1,117 @@
 # 🩳 shorts
 > well i could not google out anything reasonable in well over 60 minutes so i decided to code it in less than that. how silly i was...
 
-Use this to shorten/limit personal names to desired length, or to use initials instead of the full name.
+Use this to shorten or limit personal names to desired length, or to use initials instead of the full name.
+
+There are 3 main functions this package offers (using `John Roland Reuel Tolkien` as an example):
+- limiting a name to a given length, so that the name is as readable as possible, given the constraint
+    - `John R. R. Tolkien` or similar (depending on the constraint)
+- creating initials for part of a name (reducing a name)
+    - `J. R. R. Tolkien` or `John R. R. T.`
+- creating initials
+    - `JRRT` or `J.R.R.T.` or similar
+
+Supports **Unicode**.
 
 
 ## TODO / in progress
 
-The features are in place, i'm currently deciding on what the public interface should look like. The code is ugly, don't fret.
+The features and the public interface are in place.
+The code is still ugly, don't fret. 🙊
 
-I'm also deciding how to make it possible for a custom name parser to be provided on the fly/by configuration, so that special cases (like comound names) can easily be supported. Bear with me. 🐻
+I'm also deciding how to make it possible
+for a custom name parser to be provided on the fly/by configuration,
+so that special cases (like compound names) can easily be supported.
+Bear with me. 🐻
 
+
+**Supported**:
+- unicode names
+- arbitrary length
+
+
+What is **not (yet) supported**:
+- compound surnames (sorry folks, this may come later)
+- non-word characters will be lost
+    - `Bull, John`
+- academic and other titles
+    - `Bc. Foo Bar, Dr.Sc.`
+    - `John Bull, Sr.`
+- other writing systems than latin (may the will work, i'm just not testing them)
+
+You will need to handle these yourself before/after passing them through the shortener.
 
 ## Usage
 
-Create an instance of 🩳...
+Limit (cap) names to desired lengths:
 ```php
-$s = new Dakujem\Shorts; // or Dakujem\Shorts::i()
-```
+Shorts::cap('Pablo Escobar', 10); // "P. Escobar"
+Shorts::cap('Pablo Escobar', 2); // "PE"
 
-Limit names to desired lengths:
-```php
-$s->reduceFirst('Pablo Escobar', 10); // "P. Escobar"
-$s->reduceFirst('Pablo Escobar', 2); // "PE"
-
-$s->reduceFirst('John Ronald Reuel Tolkien', 20); // "John R. R. Tolkien"
-$s->reduceFirst('John Ronald Reuel Tolkien', 16); // "J. R. R. Tolkien"
-$s->reduceFirst('John Ronald Reuel Tolkien', 15); // "J.R.R. Tolkien"
-$s->reduceFirst('John Ronald Reuel Tolkien', 8);  // "J.R.R.T."
-$s->reduceFirst('John Ronald Reuel Tolkien', 4);  // "JRRT"
+Shorts::cap('John Ronald Reuel Tolkien', 20); // "John R. R. Tolkien"
+Shorts::cap('John Ronald Reuel Tolkien', 16); // "J. R. R. Tolkien"
+Shorts::cap('John Ronald Reuel Tolkien', 15); // "J.R.R. Tolkien"
+Shorts::cap('John Ronald Reuel Tolkien', 8);  // "J.R.R.T."
+Shorts::cap('John Ronald Reuel Tolkien', 4);  // "JRRT"
 ```
 The above will try to keep the **last name legible**, unless the limit is too strict.\
 Inverse version that will try to keep the **first name legible** is also available:
 ```php
-$s->reduceLast('Pablo Escobar', 10); // "Pablo E."
+Shorts::cap('Pablo Escobar', 10, Shorts::FIRST_NAME); // "Pablo E."
 ```
 
-Use initials except for the last name:
+Shrink names using initials except for the last name:
 ```php
-$s->keepLast('John Ronald Reuel Tolkien'); // "J. R. R. Tolkien"
-$s->keepLast('Hugo Ventil');               // "H. Ventil"
+Shorts::shrink('John Ronald Reuel Tolkien'); // "J. R. R. Tolkien"
+Shorts::shrink('Hugo Ventil');               // "H. Ventil"
 ```
 
-Use initials except for the first name:
+Shrink names using initials except for the first name:
 ```php
-$s->keepLast('John Ronald Reuel Tolkien'); // "John R. R. T."
-$s->keepLast('Hugo Ventil');               // "Hugo V."
+Shorts::shrink('John Ronald Reuel Tolkien', Shorts::FIRST_NAME); // "John R. R. T."
+Shorts::shrink('Hugo Ventil', Shorts::FIRST_NAME);               // "Hugo V."
 ```
 
-Use "short" initials:
+Create "short" initials:
 ```php
-$s->initials('John Ronald Reuel Tolkien'); // "JRRT"
-$s->keepLast('Hugo Ventil');               // "HV"
+Shorts::initials('John Ronald Reuel Tolkien'); // "JRRT"
+Shorts::initials('Hugo Ventil');               // "HV"
 ```
 ... or "longer" version:
 ```php
-$s->initials('John Ronald Reuel Tolkien', '.', ' '); // "J. R. R. T."
-$s->keepLast('Hugo Ventil', '.', ' ');               // "H. V."
+Shorts::initials('John Ronald Reuel Tolkien', '.', ' '); // "J. R. R. T."
+Shorts::initials('Hugo Ventil', '.', ' ');               // "H. V."
 ```
 
+Each of the static methods has a non-static counterpart:
+```php
+Shorts::i()->limit( ... );      // Shorts::cap( ... )
+Shorts::i()->reduce( ... );     // Shorts::shrink( ... )
+Shorts::i()->toInitials( ... ); // Shorts::initials( ... )
+```
 
-Supports:
-- unicode names
+Shorts also provides the ability co create a preconfigured formatter callable for each of the methods:
+```php
+Shorts::i()->limiter( ... )
+Shorts::i()->reducer( ... )
+Shorts::i()->initialsFormatter( ... )
+```
+These can be used as follows:
+```php
+$fmt = Shorts::i()->limiter(20); // will limit any input to 20 chars
+$fmt('Foo Bar'); // this is equivalent to  Shorts::limit('Foo Bar', 20)
+```
 
-
-What is not supported:
-- compound surnames (sorry folks, this may come later)
-- academic and other titles
-    - Bc. Foo Bar, Dr.Sc.
-    - John Bull, Sr.
-    - you need to parse these yourself
-- other writing systems than latin (may the will work, i'm just not testing them)
-
----
+> Note the formatters can come handy when defining filters for templating languages, like Twig or Latte.
 
 
 ## Testing
 
 `$` `composer test`
+
+## Contributions
+
+... are always welcome. Many times it is useful to just point out a use case the author have not thought about or come across.
 
 
 ## Possible future stuff
@@ -84,4 +119,4 @@ What is not supported:
 - include a name parser to split the names
     - https://github.com/joshfraser/PHP-Name-Parser
     - https://github.com/theiconic/name-parser
-    
+    - in fact i intend to provide a possibility to use your own explode/implode functions so that the tool is as flexible as possible
