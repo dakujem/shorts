@@ -16,6 +16,9 @@ class Shorts
     const LAST_NAME = 'ln';
 
     /** @var callable */
+    protected static $factory = null;
+
+    /** @var callable */
     protected $splitter;
 
     /** @var callable */
@@ -43,9 +46,17 @@ class Shorts
      */
     static function i(...$args): self
     {
+        if (static::$factory !== null) {
+            return call_user_func(static::$factory, ...$args);
+        }
         return new static(...$args);
     }
 
+
+    static function factory(callable $factory = null): void
+    {
+        static::$factory = $factory;
+    }
 
 //  +-------------------------------------------------------------------------+
 //  | Public interface                                                        |
