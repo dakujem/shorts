@@ -15,23 +15,24 @@ class Shorts
     const FIRST_NAME = 'fn';
     const LAST_NAME = 'ln';
 
-//    /** @var callable */
-//    protected $splitter;
-//
-//    /** @var callable */
-//    protected $stitcher;
-//
-//
-//    /**
-//     * Shorts constructor.
-//     * @param callable $splitter
-//     * @param callable $stitcher
-//     */
-//    public function __construct(callable $splitter = null, callable $stitcher = null)
-//    {
-//        $this->splitter = $splitter ?? new ShortsSplitter();
-//        $this->stitcher = $stitcher ?? new ShortsStitcher();
-//    }
+    /** @var callable */
+    protected $splitter;
+
+    /** @var callable */
+    protected $stitcher;
+
+
+    /**
+     * @param callable $splitter a callable to explode the name into parts
+     *                           function(string):array
+     * @param callable $stitcher a callable to implode the parts back to string format
+     *                           function(array):string
+     */
+    public function __construct(bool $omitMeddleNames = true, bool $omitGlue = true, callable $splitter = null, callable $stitcher = null)
+    {
+        $this->splitter = $splitter ?? new ShortsSplitter();
+        $this->stitcher = $stitcher ?? new ShortsStitcher();
+    }
 
 
     /**
@@ -252,6 +253,28 @@ class Shorts
 //  +-------------------------------------------------------------------------+
 //  | Internals                                                               |
 //  +-------------------------------------------------------------------------+
+
+
+    private function limitParts(array $parts, int $limit)
+    {
+        // bez rozdielu toho, ako je pole usporiadane, by mala vratit casti tak, ze vysledok by mal byt kratsi ako limit
+        // neviem, ci by mala pracovat s imploderom alebo nie
+        // $parts by malo byt usporiadane v takom poradi, v akom sa maju jednotlive mena skracovat, cize stredne mena prve
+
+        // kazdym prvkom pola parts by teoreticky mohol byt aj "stringable" objekt,
+        // tym padom by bolo mozne vyriesit custom imploder
+
+        // tym padom by tato metoda mohla postupne vracat vsetky varianty, ktroe by uz teoreticky mohli byt kratsie ako limit
+        // (ale prakticky nebudu, pretoze tam este budu nejake delimitery)
+
+
+        // todo
+        //      je tu v celom problem, ze aby fungovalo skracovanie tak, ako je navrhnute,
+        //      je potrebne, aby imploder pracoval vo viacerych rezimoch (vynechat lepidlo, kratke/dlhe inicialy)
+        //      celkovo teda v 3 rezimoch - normalny, bez lepidla medzi inicialmi, bez suffixu aj bez lepidla (inicialy)
+
+
+    }
 
 
     /** @deprecated */
