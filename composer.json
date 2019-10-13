@@ -1,6 +1,8 @@
 {
   "name": "dakujem/shorts",
-  "description": "A flexible name shortener. Allows to create initials, limiting name to certain length and variants.",
+  "description": "A flexible tool to shorten or limit person names in length or create initials.",
+  "license": "Unlicense",
+  "keywords": ["shorten", "name", "initials"],
   "authors": [
     {
       "name": "Andrej Rypák",
