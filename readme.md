@@ -1,17 +1,47 @@
 # 🩳 shorts
+
+![PHP from Packagist](https://img.shields.io/packagist/php-v/dakujem/shorts)
+[![Build Status](https://travis-ci.org/dakujem/shorts.svg?branch=master)](https://travis-ci.org/dakujem/shorts)
+![Nature Friendly](https://img.shields.io/badge/nature%20%F0%9F%8C%B3-friendly%20%F0%9F%92%9A-green)
+
+
+Use this tool to shorten or limit personal names to desired length, or to use initials instead of a full name.\
+Supports _Unicode_ / UTF-8 names.
+
+- limit / cap name length (with the aim to keep the name as legible as possible):
+    ```
+    | John Roland Reuel Tolkien |
+    | --> John R. Reuel Tolkien |   # last name priority
+    | -----> John R. R. Tolkien |
+    | -------> J. R. R. Tolkien |
+    | ---------> J.R.R. Tolkien |
+    | -----------> John Tolkien |
+    | ---------------> J.R.R.T. |
+    | -------------------> JRRT |
+    | ---------------------> JT |
+    |                           | 
+    | John Roland Reuel Tolkien |
+    | John R. R. Tolkien <----- |   # first name priority
+    | John R. R. T. <---------- |
+    | John R.R.T. <------------ |
+    | J.R.R.T. <--------------- |
+    | JRRT <------------------- |
+    | JT <--------------------- |
+    ```
+- shorten a name using initials for part of the name (no length constraint):
+    ```
+    John Roland Reuel Tolkien:
+  
+    - J. R. R. Tolkien
+    - John R. R. T.
+    ```
+- create initials (configurable separator):
+  ```
+  - JRRT
+  - J. R. R. T.
+  ```
+
 > well i could not google out anything reasonable in well over 60 minutes so i decided to code it in less than that. how silly i was...
-
-Use this to shorten or limit personal names to desired length, or to use initials instead of the full name.
-
-There are 3 main functions this package offers (using `John Roland Reuel Tolkien` as an example):
-- limiting a name to a given length, so that the name is as readable as possible, given the constraint
-    - `John R. R. Tolkien` or similar (depending on the constraint)
-- creating initials for part of a name (reducing a name)
-    - `J. R. R. Tolkien` or `John R. R. T.`
-- creating initials
-    - `JRRT` or `J.R.R.T.` or similar
-
-Supports **Unicode**.
 
 
 ## TODO / in progress
@@ -40,6 +70,7 @@ What is **not (yet) supported**:
 - other writing systems than latin (may the will work, i'm just not testing them)
 
 You will need to handle these yourself before/after passing them through the shortener.
+
 
 ## Usage
 
@@ -99,7 +130,7 @@ Shorts::i()->initialsFormatter( ... )
 These can be used as follows:
 ```php
 $fmt = Shorts::i()->limiter(20); // will limit any input to 20 chars
-$fmt('Foo Bar'); // this is equivalent to  Shorts::limit('Foo Bar', 20)
+$fmt('Foo Bar'); // this is equivalent to  Shorts::cap('Foo Bar', 20)
 ```
 
 > Note the formatters can come handy when defining filters for templating languages, like Twig or Latte.
@@ -108,6 +139,7 @@ $fmt('Foo Bar'); // this is equivalent to  Shorts::limit('Foo Bar', 20)
 ## Testing
 
 `$` `composer test`
+
 
 ## Contributions
 
