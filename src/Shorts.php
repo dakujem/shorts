@@ -4,6 +4,8 @@
 namespace Dakujem;
 
 
+use Dakujem\Shorts\Equip\ShortsSplitter;
+use Dakujem\Shorts\Equip\ShortsStitcher;
 use LogicException;
 
 /**
@@ -284,6 +286,19 @@ class Shorts
         //      je potrebne, aby imploder pracoval vo viacerych rezimoch (vynechat lepidlo, kratke/dlhe inicialy)
         //      celkovo teda v 3 rezimoch - normalny, bez lepidla medzi inicialmi, bez suffixu aj bez lepidla (inicialy)
 
+
+        // UPDATE
+        // mozny princip fungovania:
+        // 1. algoritmus bude rozdeleny na exploder, iterator a imploder
+        // 2. iterator postupne skracuje podla poradia priority jednotlive mena a odovzdava ich imploderovi
+        // 3. pokial narazi na vhodnu dlzku<$limit, tato cast konci
+        // 4. nasledne sa vytvoria dalsie varianty, ktore by mohli vyhovovoat: vynechaju vsetky stredne mena; pouziju sa len inicialy
+        // 5. z tychto moznosti sa vyberie najdlhsia (ktora vyhovuje limitu) alebo ta s najvyssou informacnou hodnotou
+        // tymto je zaistene, ze bez ohlau na imploder je vzdy mozne vratit optimalny vysledok, ale algoritmus je zlozitejsi
+
+
+        // UPDATE 2
+        // ok, vzdavam sa, "shrinker" bude musiet mat vlastny (vlastne) implodery a bude potrebne ho implmeentovat ako samostatnu cast
 
     }
 

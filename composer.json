@@ -19,6 +19,7 @@
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
+      "Dakujem\\Shorts\\Equip\\": "src/Equip",
       "Dakujem\\": "src/"
     }
   },

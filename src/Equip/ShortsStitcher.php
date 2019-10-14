@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Dakujem;
+namespace Dakujem\Shorts\Equip;
 
 
 /**

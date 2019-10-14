@@ -71,6 +71,14 @@ What is **not (yet) supported**:
 
 You will need to handle these yourself before/after passing them through the shortener.
 
+**Possible future stuff**
+- include a name parser to split the names
+    - https://github.com/joshfraser/PHP-Name-Parser
+    - https://github.com/theiconic/name-parser
+    - in fact i intend to provide a possibility to use your own explode/implode functions so that the tool is as flexible as possible
+- cache (since all of this starts to look a bit complex)
+    - `Shorts::i()->reducer( ... )->cache()` / `Shorts::cache(Shorts::i()->reducer( ... ))`
+
 
 ## Usage
 
@@ -145,10 +153,3 @@ $fmt('Foo Bar'); // this is equivalent to  Shorts::cap('Foo Bar', 20)
 
 ... are always welcome. Many times it is useful to just point out a use case the author have not thought about or come across.
 
-
-## Possible future stuff
-
-- include a name parser to split the names
-    - https://github.com/joshfraser/PHP-Name-Parser
-    - https://github.com/theiconic/name-parser
-    - in fact i intend to provide a possibility to use your own explode/implode functions so that the tool is as flexible as possible
