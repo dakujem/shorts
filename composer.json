@@ -13,7 +13,7 @@
     "php": ">=7.1"
   },
   "require-dev": {
-    "nette/tester": "^2.4"
+    "nette/tester": "^2.3.5"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
