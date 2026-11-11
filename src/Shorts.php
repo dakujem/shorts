@@ -204,7 +204,7 @@ class Shorts
      */
     function limiter(int $limitPreset, string $priorityPreset = self::LAST_NAME): callable
     {
-        return function (string $fullName, int $limit = null, string $priority = null) use ($limitPreset, $priorityPreset): string {
+        return function (string $fullName, ?int $limit = null, ?string $priority = null) use ($limitPreset, $priorityPreset): string {
             return $this->limit($fullName, $limit ?? $limitPreset, $priority ?? $priorityPreset);
         };
     }
@@ -223,7 +223,7 @@ class Shorts
      */
     function reducer(string $priorityPreset = self::LAST_NAME): callable
     {
-        return function (string $fullName, string $priority = null) use ($priorityPreset): string {
+        return function (string $fullName, ?string $priority = null) use ($priorityPreset): string {
             return $this->reduce($fullName, $priority ?? $priorityPreset);
         };
     }
@@ -243,7 +243,7 @@ class Shorts
      */
     function initialsFormatter(string $suffixPreset = '', string $gluePreset = ''): callable
     {
-        return function (string $fullName, string $suffix = null, string $glue = null) use ($suffixPreset, $gluePreset): string {
+        return function (string $fullName, ?string $suffix = null, ?string $glue = null) use ($suffixPreset, $gluePreset): string {
             return $this->initials($fullName, $suffix ?? $suffixPreset, $glue ?? $gluePreset);
         };
     }
