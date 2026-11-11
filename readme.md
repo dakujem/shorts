@@ -2,7 +2,7 @@
 
 ![PHP from Packagist](https://img.shields.io/packagist/php-v/dakujem/shorts)
 [![Test Suite](https://github.com/dakujem/shorts/actions/workflows/php-test.yml/badge.svg)](https://github.com/dakujem/shorts/actions/workflows/php-test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/dakujem/shorts/badge.svg?branch=master)](https://coveralls.io/github/dakujem/shorts?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/dakujem/shorts/badge.svg?branch=trunk)](https://coveralls.io/github/dakujem/shorts?branch=trunk)
 ![Nature Friendly](https://img.shields.io/badge/nature%20%F0%9F%8C%B3-friendly%20%F0%9F%92%9A-green)
 
 
